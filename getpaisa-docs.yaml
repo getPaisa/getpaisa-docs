@@ -1,0 +1,409 @@
+openapi: 3.0.0
+info:
+  title: GetPaisa API
+  version: 1.0.0
+  description: API documentation for GetPaisa services
+
+paths:
+  /companies:
+    post:
+      summary: Create a new company
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ICompany'
+      responses:
+        '201':
+          description: Company created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+        '400':
+          description: Error creating company
+
+  /companies/{companyId}/settings:
+    put:
+      summary: Update company settings
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IEWASettings'
+      responses:
+        '200':
+          description: Company settings updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+        '400':
+          description: Error updating company settings
+
+  /companies/{companyId}/branches:
+    get:
+      summary: Get company and its branches
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Company and branches retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  company:
+                    $ref: '#/components/schemas/Company'
+                  branches:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Branch'
+        '400':
+          description: Error fetching company data
+
+  /users:
+    post:
+      summary: Create a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IUser'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IUserDocument'
+        '400':
+          description: Error creating user
+
+  /users/{userId}:
+    put:
+      summary: Update user details
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IUser'
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IUserDocument'
+        '400':
+          description: Error updating user
+
+  /users/{userId}/employment:
+    put:
+      summary: Update employment details
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IEmploymentDetails'
+      responses:
+        '200':
+          description: Employment details updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IUserDocument'
+        '400':
+          description: Error updating employment details
+
+  /roles:
+    post:
+      summary: Create a new role
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IRole'
+      responses:
+        '201':
+          description: Role created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        '400':
+          description: Error creating role
+
+  /roles/{roleId}:
+    get:
+      summary: Get a role by its ID
+      parameters:
+        - name: roleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Role retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        '404':
+          description: Role not found
+
+components:
+  schemas:
+    ICompany:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        registrationNumber:
+          type: string
+        type:
+          type: string
+          enum: ['enterprise', 'sme', 'startup']
+        status:
+          type: string
+          enum: ['active', 'inactive', 'suspended']
+        contact:
+          $ref: '#/components/schemas/IContact'
+        payrollProvider:
+          type: string
+        payrollIntegrationDetails:
+          $ref: '#/components/schemas/IPayrollIntegrationDetails'
+        payPeriods:
+          $ref: '#/components/schemas/IPayPeriods'
+        ewaSettings:
+          $ref: '#/components/schemas/IEWASettings'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    IEWASettings:
+      type: object
+      properties:
+        maxWithdrawalPercentage:
+          type: number
+        withdrawalFee:
+          type: number
+        minimumAmount:
+          type: number
+        maximumAmount:
+          type: number
+        cooldownPeriod:
+          type: number
+        enabled:
+          type: boolean
+
+    IUser:
+      type: object
+      properties:
+        _id:
+          type: string
+        email:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        company:
+          type: string
+        role:
+          type: string
+        status:
+          type: string
+          enum: ['active', 'suspended', 'terminated']
+        employmentDetails:
+          $ref: '#/components/schemas/IEmploymentDetails'
+        bankAccounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/IBankAccountDetails'
+        branchAssignments:
+          type: array
+          items:
+            $ref: '#/components/schemas/IBranchAssignment'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    IEmploymentDetails:
+      type: object
+      properties:
+        compensationType:
+          type: string
+          enum: ['hourly', 'monthly']
+        monthlySalary:
+          type: number
+        hourlyRate:
+          type: number
+        paymentFrequency:
+          type: string
+          enum: ['monthly', 'bi-weekly', 'weekly']
+        workingHoursPerWeek:
+          type: number
+        effectiveDate:
+          type: string
+          format: date-time
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/IEmploymentHistory'
+
+    IRole:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: object
+            properties:
+              resource:
+                type: string
+              actions:
+                type: array
+                items:
+                  type: string
+                  enum: ['create', 'read', 'update', 'delete', 'manage']
+        isSystem:
+          type: boolean
+
+    IContact:
+      type: object
+      properties:
+        email:
+          type: string
+        phone:
+          type: string
+        address:
+          $ref: '#/components/schemas/IAddress'
+
+    IPayrollIntegrationDetails:
+      type: object
+      properties:
+        apiKey:
+          type: string
+        providerId:
+          type: string
+        settings:
+          type: object
+          additionalProperties: true
+
+    IPayPeriods:
+      type: object
+      properties:
+        frequency:
+          type: string
+          enum: ['weekly', 'bi-weekly', 'monthly']
+        startDay:
+          type: number
+        cutoffDay:
+          type: number
+
+    IAddress:
+      type: object
+      properties:
+        street:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        country:
+          type: string
+        postalCode:
+          type: string
+
+    IEmploymentHistory:
+      type: object
+      properties:
+        compensationType:
+          type: string
+          enum: ['hourly', 'monthly']
+        amount:
+          type: number
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        changedBy:
+          type: string
+
+    IBankAccountDetails:
+      type: object
+      properties:
+        bankName:
+          type: string
+        accountNumber:
+          type: string
+        routingNumber:
+          type: string
+        isDefault:
+          type: boolean
+        verified:
+          type: boolean
+
+    IBranchAssignment:
+      type: object
+      properties:
+        branchId:
+          type: string
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        isPrimary:
+          type: boolean
+        position:
+          type: string
+        status:
+          type: string
+          enum: ['active', 'inactive', 'terminated']
